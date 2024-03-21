@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simuladorip</title>
+</head>
+<body>
+  <header>  <h1>Simulador de información de IP</h1></header>
+ 
+  <form id="ipForm">
+    <input type="text" id="ipInput" placeholder="Ejemplo: 192.168.1.1" required>
+    <button type="submit">Capturar Datos</button>
+  </form>
+  <form id="filtroForm">
+    <label for="pais">País:</label>
+    <input type="text" id="pais" name="pais">
+    <br>
+    <label for="responsable">Responsable:</label>
+    <input type="text" id="responsable" name="responsable">
+    <br>
+    <label for="claseA">Clase A:</label>
+    <input type="checkbox" id="claseA" name="clase" value="Clase A">
+    <label for="claseB">Clase B:</label>
+    <input type="checkbox" id="claseB" name="clase" value="Clase B">
+    <label for="claseC">Clase C:</label>
+    <input type="checkbox" id="claseC" name="clase" value="Clase C">
+    <br>
+    <button type="submit">Filtrar</button>
+  </form>
+  <div id="resultado"></div>
+
+  <h1>IPs Guardadas</h1>
+  <ul id="ipsList"></ul>
+    
+  <footer> <h3>Sotomayor Arnaldo</h3></footer>
+  <Script src="js/main.js"></Script>
+</body>
+</html>
