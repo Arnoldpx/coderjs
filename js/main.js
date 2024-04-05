@@ -1,3 +1,59 @@
+// Función para consultar información de una IP utilizando la API de ipinfo.io
+async function consultarInformacionIP(ip) {
+  const token = 'fc48bc6a2d44ef'; 
+  const url = `https://ipinfo.io/${ip}?token=${token}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Error al obtener los datos de la IP');
+    }
+    const data = await response.json();
+    console.log(data)
+    return data;
+  } catch (error) {
+    console.error('Error al consultar información de la IP:', error);
+    return null;
+  }
+}
+
+document.getElementById("ipForm").addEventListener("submit", async function(event) {
+  event.preventDefault(); 
+  // Capturamos la IP ingresada
+  const direccionIP = document.getElementById("ipInput").value.trim(); 
+  const validar = validarIP(direccionIP); 
+  if (validar) { 
+    console.log("La dirección IP es válida");
+    console.log("Clase de IP:", obtenerClaseIP(direccionIP)); 
+    console.log("Estado de la IP:", bloquearIP(direccionIP)); 
+    
+    try {
+      // Consultar información de la IP utilizando la función consultarInformacionIP
+      const ipInfo = await consultarInformacionIP(direccionIP);
+      console.log("Información de la IP:", ipInfo);
+
+      // Agregar la IP al array de IPs guardadas junto con otros datos
+      ipsGuardadas.push({
+        ip: direccionIP,
+        claseIP: obtenerClaseIP(direccionIP),
+        estado: bloquearIP(direccionIP),
+        responsable: ipInfo.hostname, 
+        pais: ipInfo.country,
+        region: ipInfo.region, 
+        ciudad: ipInfo.city, 
+        organizacion: ipInfo.org,
+        postal: ipInfo.postal
+      });
+
+      // Actualizar el archivo JavaScript con las IPs guardadas
+      actualizarIPsJavaScript();
+    } catch (error) {
+      console.error('Error al consultar información de la IP:', error);
+    }
+  } else {
+    console.log("La dirección IP no es válida");
+  }
+});
 
 let ipsGuardadas = []; 
 
@@ -24,14 +80,44 @@ function validarIP(direccionIP) {
 // Funcion mostrar las ip guardadas en el array
 
 function mostrarIPsGuardadas() {
-  const ipsList = document.getElementById('ipsList');
-  ipsList.innerHTML = ''; 
-  ipsGuardadas.forEach(ipData => {
-    const listItem = document.createElement('li');
-    listItem.textContent = `IP: ${ipData.ip}, Clase: ${ipData.claseIP}, Responsable: ${ipData.responsable}, Estado: ${ipData.estado}, País: ${ipData.pais}`;
-    ipsList.appendChild(listItem);
-  });
-}
+  const table = document.getElementById("tablaIps").querySelector("tbody");
+table.innerHTML = "";
+let contador = 1;
+ipsGuardadas.forEach(ip => {
+  const row = table.insertRow(-1);
+
+  const cellContador = row.insertCell(0);
+  cellContador.textContent = contador++;
+
+  const cellIp = row.insertCell(1);
+  cellIp.textContent = ip.ip;
+
+  const cellClase = row.insertCell(2);
+  cellClase.textContent = ip.claseIP;
+
+
+  const cellEstado = row.insertCell(3);
+  cellEstado.textContent = ip.estado;
+
+  const cellOrganizacion = row.insertCell(4);
+  cellOrganizacion.textContent =  ip.organizacion;
+
+  const cellPais = row.insertCell(5);
+  cellPais.textContent = ip.pais;
+
+
+  const cellCiudad = row.insertCell(6);
+  cellCiudad.textContent = ip.ciudad;
+
+  const cellPostal = row.insertCell(7);
+  cellPostal.textContent = ip.postal;
+
+
+  const cellRegion = row.insertCell(8);
+  cellRegion.textContent = ip.region;
+});    
+  }
+
 
 document.getElementById("ipForm").addEventListener("submit", function(event) {
   event.preventDefault(); 
@@ -44,14 +130,14 @@ document.getElementById("ipForm").addEventListener("submit", function(event) {
     console.log("Estado de la IP:", bloquearIP(direccionIP)); 
     
     // Agregar la IP al array de IPs guardadas junto con otros datos
-    ipsGuardadas.push({
+    /*ipsGuardadas.push({
       ip: direccionIP,
       claseIP: obtenerClaseIP(direccionIP),
       responsable: obtenerResponsableAleatorio(),
-      estado: obtenerEstadoAleatorio(),
-      pais: obtenerPaisAleatorio()
+      estado: obtenerE(),
+      pais: obtenerPais()
     });
-
+*/
     // Actualizar el archivo JavaScript con las IPs guardadas
     actualizarIPsJavaScript();
   } else {
@@ -59,7 +145,7 @@ document.getElementById("ipForm").addEventListener("submit", function(event) {
   }
 });
 
-function obtenerResponsableAleatorio() {
+/*function obtenerResponsableAleatorio() {
   const responsables = ["Juan", "María", "Pedro", "Ana", "José", "Rosa", "Luis", "Camila"];
   return responsables[Math.floor(Math.random() * responsables.length)];
 }
@@ -72,11 +158,11 @@ function obtenerEstadoAleatorio() {
 function obtenerPaisAleatorio() {
   const paises = ["Argentina", "Brasil", "Chile", "Colombia", "Ecuador", "México", "Perú", "Uruguay", "Venezuela"];
   return paises[Math.floor(Math.random() * paises.length)];
-}
+}*/
 
 function actualizarIPsJavaScript() {
   // Convertir el array de IPs guardadas a JSON 
-  const contenido = `let ipsGuardadas = ${JSON.stringify(ipsGuardadas)};`;
+  const contenido = `ipsGuardadas = ${JSON.stringify(ipsGuardadas)};`;
 
   const blob = new Blob([contenido], { type: "text/javascript" });
   const url = URL.createObjectURL(blob);
@@ -89,8 +175,8 @@ function actualizarIPsJavaScript() {
     existingScript.parentNode.removeChild(existingScript);
   }
 
-  script.id = "ipsScript";
-  document.body.appendChild(script);
+  /*script.id = "ipsScript";
+  document.body.appendChild(script);*/
 
   mostrarIPsGuardadas();
 }
@@ -123,8 +209,8 @@ function bloquearIP(direccionIP) {
   }
 }
    
-function mostrarResultados(resultados) {
-  const resultadoDiv = document.getElementById("resultado");
+/*function mostrarResultados(resultados) {
+  const resultadoDiv = document.getElementById("myTable");
   resultadoDiv.innerHTML = "";
 
   if (resultados.length === 0) {
@@ -139,19 +225,49 @@ function mostrarResultados(resultados) {
     });
     resultadoDiv.appendChild(lista);
   }
+}*/
+
+//Funcion muestra las ip filtradas
+function mostrarResultados(resultados){
+const table = document.getElementById("tablaFil").querySelector("tbody");
+table.innerHTML = "";
+let contador = 1;
+ipsGuardadas.forEach(ip => {
+  const row = table.insertRow(-1);
+
+  const cellContador = row.insertCell(0);
+  cellContador.textContent = contador++;
+
+  const cellIp = row.insertCell(1);
+  cellIp.textContent = ip.ip;
+
+  const cellClase = row.insertCell(2);
+  cellClase.textContent = ip.claseIP;
+
+
+  const cellEstado = row.insertCell(3);
+  cellEstado.textContent = ip.estado;
+
+  const cellOrganizacion = row.insertCell(4);
+  cellOrganizacion.textContent =  ip.organizacion;
+
+  const cellPais = row.insertCell(5);
+  cellPais.textContent = ip.pais;
+
+
+  const cellCiudad = row.insertCell(6);
+  cellCiudad.textContent = ip.ciudad;
+
+  const cellPostal = row.insertCell(7);
+  cellPostal.textContent = ip.postal;
+
+
+  const cellRegion = row.insertCell(8);
+  cellRegion.textContent = ip.region;
+});    
 }
 //capturar datos para filtrar,  y evita que el formulariorecargue la pagina cuando se envia
 
-
-document.getElementById("filtroForm").addEventListener("submit", function(event) {
-  event.preventDefault(); 
-  
-  const pais = document.getElementById("pais").value;
-  const responsable = document.getElementById("responsable").value;
-  const clases = Array.from(document.querySelectorAll('input[name="clase"]:checked')).map(el => el.value);
-
-  filtrarIPs(pais, responsable, clases);
-});
 
 function filtrarIPsGuardadas(pais, responsable, clases) {
   const resultados = ipsGuardadas.filter(ip => {
@@ -160,5 +276,28 @@ function filtrarIPsGuardadas(pais, responsable, clases) {
            (clases.length === 0 || clases.includes(ip.claseIP));
   });
 
+  // Mostrar los resultados del filtrado en la interfaz de usuario
   mostrarResultados(resultados);
+}
+
+// Agregar evento de escucha para el formulario de filtrado
+document.getElementById("filtroForm").addEventListener("submit", function(event) {
+  event.preventDefault(); 
+  
+  // Obtener los valores de los campos de filtro
+  const pais = document.getElementById("pais").value;
+  const responsable = document.getElementById("responsable").value;
+  const clases = Array.from(document.querySelectorAll('input[name="clase"]:checked')).map(el => el.value);
+
+  // Filtrar las IPs guardadas con los criterios especificados
+  filtrarIPsGuardadas(pais, responsable, clases);
+});
+ 
+// Limpiar la tabla de ip filtradas
+document.getElementById("eliminarFiltradoBtn").addEventListener("click", function() {
+  eliminarFiltrado();
+});
+function eliminarFiltrado() {
+  const table = document.getElementById("tablaFil").querySelector("tbody");
+  table.innerHTML = "";
 }
